@@ -3,19 +3,9 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const cookieSession = require("cookie-session");
-const secret = "secretCuisine123";
+const flash = require('connect-flash');
 
 const app = express();
-
-app.use(
-  cookieSession({
-    name: 'session',
-    keys: [secret],
-    // Cookieの有効期限
-    maxAge: 24 * 60 * 60 * 1000
-  })
-)
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,7 +16,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use("/", require("./routes"));
+app.use(flash());
+
+// authorization
+require("./config/passport")(app);
+
+// router
+app.use('/', require('./routes'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
